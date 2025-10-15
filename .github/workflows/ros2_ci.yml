@@ -1,0 +1,50 @@
+name: build_test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build_test:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-22.04
+        rosdistro:
+          - humble
+
+    runs-on: ${{ matrix.os }}
+
+    container:
+      image: ros:${{ matrix.rosdistro }}-ros-base
+
+    steps:
+      - name: Setup directories
+        run: mkdir -p ros2_ws/src
+
+      - name: Check out repository (with submodules)
+        uses: actions/checkout@v5
+        with:
+          path: ros2_ws/src/${{ github.event.repository.name }}
+          submodules: recursive 
+
+      - name: Install dependencies
+        run: |
+          apt update && apt install -y ros-humble-ros2-control ros-humble-ros2-controllers ros-humble-gripper-controllers ros-humble-moveit ros-humble-gazebo-* ros-humble-joint-state-publisher-gui
+
+      - name: Build tests
+        id: build_test
+        run: |
+          . /opt/ros/${{ matrix.rosdistro }}/setup.sh &&
+          colcon build --base-paths ros2_ws
+        continue-on-error: true
+
+      - name: build_test command success
+        if: steps.build_test.outcome == 'success'
+        run: echo "result - success"
+
+      - name: build_test command failure
+        if: steps.build_test.outcome == 'failure'
+        run: echo "result - failure" && exit 1
