@@ -1,0 +1,3 @@
+[submodule "topoarm_hardware/include/lib_dynamixel"]
+	path = topoarm_hardware/include/lib_dynamixel
+	url = https://github.com/SHINOBI-organization/lib_dynamixel.git

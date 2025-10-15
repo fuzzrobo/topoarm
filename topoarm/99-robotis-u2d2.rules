@@ -1,0 +1,2 @@
+# FT232HL
+SUBSYSTEM=="tty", ATTRS{idVendor}=="0403", ATTRS{idProduct}=="6014", ATTR{device/latency_timer}="4", SYMLINK+="ttyDXL_u2d2", MODE="0666"

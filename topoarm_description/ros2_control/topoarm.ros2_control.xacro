@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+    <xacro:macro name="topoarm_interface" params="joint_name pos_min pos_max mimic:='' multiplier:=1.0 kp:=0 ki:=0 kd:=0 operating_mode:=3">
+        <joint name="${joint_name}">
+            <xacro:if value="${mimic != ''}">
+                <param name="mimic">${mimic}</param>
+            </xacro:if>
+            <param name="multiplier">${multiplier}</param>
+            <command_interface name="position">
+                <param name="min">${pos_min}</param>
+                <param name="max">${pos_max}</param>
+            </command_interface>
+            <state_interface name="position"/>
+            <state_interface name="velocity"/>
+            <state_interface name="effort"/>
+            <param name="position_kp">${kp}</param>
+            <param name="position_ki">${ki}</param>
+            <param name="position_kd">${kd}</param>
+            <param name="eeprom.operating_mode">${operating_mode}</param>
+        </joint>
+    </xacro:macro>
+
+    <xacro:macro name="topoarm_system" params="name prefix use_sim torque use_fake_hardware fake_sensor_commands">
+        <ros2_control name="${name}" type="system">
+            <hardware>
+                <xacro:if value="$(arg use_sim)">
+                        <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+                </xacro:if>
+                <xacro:unless value="$(arg use_sim)">
+                    <xacro:if value="${use_fake_hardware}">
+                        <plugin>fake_components/GenericSystem</plugin>
+                        <param name="fake_sensor_commands">${fake_sensor_commands}</param>
+                        <param name="state_following_offset">0.0</param>
+                    </xacro:if>
+                    <xacro:unless value="${use_fake_hardware}">
+                        <plugin>topoarm_hardware/ToPoArmSystemHardware</plugin>
+                        <param name="usb_port">/dev/ttyDXL_u2d2</param>
+                        <param name="baud_rate">1000000</param>
+                        <param name="latency_timer">4</param>
+                        <param name="min_id">11</param>
+                        <param name="max_id">17</param>
+                        <param name="torque">${torque}</param>
+                        <param name="torque_retention">true</param>
+                        <param name="default_profile_acceleration">7.5</param>
+                        <param name="default_profile_velocity">4.8</param>
+                        <!-- eeprom -->
+                        <param name="eeprom.return_delay_time">0</param>
+                        <param name="eeprom.drive_mode">0</param>
+                        <param name="eeprom.operating_mode">3</param> <!-- Current Based Position -->
+                        <param name="eeprom.homing_offset">0</param>
+                        <param name="eeprom.moving_threshold">10</param>
+                        <param name="eeprom.temperature_limit">80</param>
+                        <param name="eeprom.max_voltage_limit">160</param>
+                        <param name="eeprom.min_voltage_limit">95</param>
+                        <param name="eeprom.pwm_limit">885</param>
+                        <param name="eeprom.current_limit">1193</param>
+                        <param name="eeprom.velocity_limit">200</param>
+                        <param name="eeprom.max_position_limit">4095</param>
+                        <param name="eeprom.min_position_limit">0</param>
+                        <param name="eeprom.shutdown">52</param>
+                    </xacro:unless>
+                </xacro:unless>
+            </hardware>
+            <xacro:topoarm_interface joint_name="${prefix}joint1" pos_min="${-pi*0.9}" pos_max="${pi*0.9}" kp="800" ki="0" kd="0"/>
+            <xacro:topoarm_interface joint_name="${prefix}joint2" pos_min="${-pi*0.541}" pos_max="${pi*0.562}" kp="800" ki="0" kd="0"/>
+            <xacro:topoarm_interface joint_name="${prefix}joint3" pos_min="${-pi*0.560}" pos_max="${pi*0.591}" kp="800" ki="0" kd="0"/>
+            <xacro:topoarm_interface joint_name="${prefix}joint4" pos_min="${-pi*0.5}" pos_max="${pi*0.5}" kp="800" ki="0" kd="0"/>
+            <xacro:topoarm_interface joint_name="${prefix}joint5" pos_min="${-pi*0.531}" pos_max="${pi*0.567}" kp="800" ki="0" kd="0"/>
+            <xacro:topoarm_interface joint_name="${prefix}joint6" pos_min="${-pi*0.9}" pos_max="${pi*0.9}" kp="800" ki="0" kd="0"/>
+            <xacro:topoarm_interface joint_name="${prefix}gripper_left_joint" pos_min="-0.010" pos_max="0.019" multiplier="-0.015" kp="800" ki="0" kd="0" operating_mode="5"/>
+            <xacro:topoarm_interface joint_name="${prefix}gripper_right_joint" pos_min="-0.010" pos_max="0.019" mimic="${prefix}gripper_left_joint"/>
+        </ros2_control>
+    </xacro:macro>
+</robot>

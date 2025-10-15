@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  topoarm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: topoarm:latest
+    container_name: ros_topoarm_container    
+    tty: true                 # 対話的なプロンプトを維持
+    stdin_open: true          # 標準入力を開いたままにする
+    privileged: true # 多くのGUI/GPU設定で権限の問題を避けるために設定
+    # runtime: nvidia
+    #network_mode: host
+    environment:
+      - DISPLAY=${DISPLAY}             # ホストのディスプレイ番号をコンテナに渡す
+      - QT_X11_NO_MITSHM=1           # Qtアプリケーションでのエラーを回避
+      - XDG_RUNTIME_DIR=/tmp/runtime/  # Wayland互換性のための設定
+      - NVIDIA_VISIBLE_DEVICES=all
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix  # X11ソケットの共有
+      - ${HOME}/.Xauthority:/root/.Xauthority:ro # X認証情報（ホストでxhostを実行済みの場合）
+      - ../topoarm:/ros2_ws/src/topoarm
+      # ROSワークスペースのビルド結果を永続化するための名前付きボリューム
+      - ros_ws_volume:/ros2_ws/install
+    devices:
+      - "/dev/ttyDXL_u2d2:/dev/ttyDXL_u2d2"
+    working_dir: /ros2_ws
+    command: /bin/bash -c "exec bash"
+volumes:
+  ros_ws_volume:

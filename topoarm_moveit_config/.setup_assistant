@@ -1,0 +1,25 @@
+moveit_setup_assistant_config:
+  urdf:
+    package: topoarm_description
+    relative_path: urdf/topoarm.urdf.xacro
+  srdf:
+    relative_path: config/topoarm.srdf
+  package_settings:
+    author_name: nagashima
+    author_email: nagashima@fuzzrobo.com
+    generated_timestamp: 1756378909
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity
+  modified_urdf:
+    xacros:
+      - control_xacro
+  control_xacro:
+    command:
+      - position
+    state:
+      - position
+      - velocity

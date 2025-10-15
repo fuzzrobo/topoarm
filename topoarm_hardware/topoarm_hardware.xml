@@ -1,0 +1,7 @@
+<library path="topoarm_hardware">
+  <class name="topoarm_hardware/ToPoArmSystemHardware" type="fuzzrobo::topoarm_hardware::ToPoArmSystemHardware" base_class_type="hardware_interface::SystemInterface">
+    <description>
+      Add description
+    </description>
+  </class>
+</library>
